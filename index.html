@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Field Asset Capture Node (Win98 Edition)</title>
+    <style>
+        :root {
+            --win-bg: #C0C0C0;
+            --win-border-light: #FFFFFF;
+            --win-border-dark: #808080;
+            --win-border-darker: #000000;
+            --win-text: #000000;
+            --win-title-bg: #000080;
+            --win-title-text: #FFFFFF;
+            --win-input-bg: #FFFFFF;
+            --desktop-bg: #008080;
+        }
+
+        body {
+            font-family: "Microsoft Sans Serif", "Ms Sans Serif", sans-serif;
+            background-color: var(--desktop-bg);
+            margin: 0;
+            padding: 1.5rem;
+            color: var(--win-text);
+        }
+
+        h2.main-title {
+            text-align: center;
+            color: #FFFFFF;
+            font-weight: bold;
+            font-size: 1.6rem;
+            margin-bottom: 1.5rem;
+            text-shadow: 1px 1px #000;
+        }
+
+        .window {
+            background-color: var(--win-bg);
+            border: 2px solid;
+            border-color: var(--win-border-light) var(--win-border-darker) var(--win-border-darker) var(--win-border-light);
+            max-width: 500px;
+            margin: 0 auto;
+            box-shadow: 2px 2px 8px rgba(0,0,0,0.5);
+            padding: 2px;
+        }
+
+        .title-bar {
+            background-color: var(--win-title-bg);
+            color: var(--win-title-text);
+            padding: 4px 8px;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 14px;
+        }
+
+        .window-body { padding: 10px; }
+
+        .box {
+            background: var(--win-bg);
+            padding: 12px;
+            margin-bottom: 1rem;
+            border: 1px solid;
+            border-color: var(--win-border-dark) var(--win-border-light) var(--win-border-light) var(--win-border-dark);
+        }
+
+        h3.section-title {
+            margin: 0 0 10px 0;
+            font-size: 13px;
+            font-weight: bold;
+            text-decoration: underline;
+        }
+
+        video, canvas {
+            width: 100%;
+            max-width: 100%;
+            display: block;
+            margin: 5px 0 10px 0;
+            background: #000;
+            border: 2px solid;
+            border-color: var(--win-border-darker) var(--win-border-light) var(--win-border-light) var(--win-border-darker);
+        }
+
+        button, select {
+            font-family: "Microsoft Sans Serif", "Ms Sans Serif", sans-serif;
+            font-size: 13px;
+            color: var(--win-text);
+            background-color: var(--win-bg);
+            border: 2px solid;
+            border-color: var(--win-border-light) var(--win-border-darker) var(--win-border-darker) var(--win-border-light);
+            padding: 5px 14px;
+            cursor: pointer;
+            outline: none;
+        }
+
+        button:active:not(:disabled) {
+            border-color: var(--win-border-darker) var(--win-border-light) var(--win-border-light) var(--win-border-darker);
+            padding: 6px 13px 4px 15px;
+        }
+
+        button:disabled {
+            color: var(--win-border-dark);
+            text-shadow: 1px 1px var(--win-border-light);
+            cursor: not-allowed;
+        }
+
+        input[type="text"], select {
+            font-family: monospace;
+            font-size: 13px;
+            background-color: var(--win-input-bg);
+            border: 2px solid;
+            border-color: var(--win-border-darker) var(--win-border-light) var(--win-border-light) var(--win-border-darker);
+            padding: 4px;
+            box-sizing: border-box;
+            outline: none;
+            width: 100%;
+        }
+
+        .status-container {
+            margin: 5px 0 10px 0;
+            font-weight: bold;
+            font-size: 13px;
+            padding: 6px;
+            background: #FFFFAA;
+            border: 1px solid var(--win-border-dark);
+        }
+
+        .settings-pane { display: none; background: #D8D8D8; padding: 10px; margin-top: 5px; border: 1px solid var(--win-border-dark); }
+        .settings-pane.open { display: block; }
+        .settings-field { margin-bottom: 8px; }
+        .settings-field label { font-size: 12px; display: block; margin-bottom: 4px; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <h2 class="main-title">Field Asset Capture Node</h2>
+
+    <div class="window">
+        <div class="title-bar">
+            <p class="title-bar-text">Field_Capture_v1.50.exe</p>
+        </div>
+
+        <div class="window-body">
+
+            <fieldset class="box">
+                <legend style="font-weight: bold; font-size: 13px;">Cloud Link Configuration</legend>
+                <button id="settingsToggleBtn" style="margin-bottom: 5px;">View Token Settings</button>
+                
+                <div id="settingsPane" class="settings-pane">
+                    <div class="settings-field">
+                        <label for="dropboxToken">Dropbox Access Token:</label>
+                        <input type="text" id="dropboxToken" placeholder="sl.xxx...">
+                    </div>
+                </div>
+            </fieldset>
+
+            <div class="box">
+                <label for="inspectionMode" style="font-weight: bold; font-size: 13px; display: block; margin-bottom: 5px;">Inspection Task Profile:</label>
+                <select id="inspectionMode">
+                    <option value="gauge">Analogue Gauge & Valve Reading</option>
+                    <option value="asset_tag">Asset Plate & Equipment Identification</option>
+                    <option value="hazard">Safety Integrity & Corrosion Check</option>
+                </select>
+            </div>
+
+            <div class="box">
+                <h3 class="section-title">Field Sight Input</h3>
+                <video id="video" autoplay playsinline></video>
+                <div id="status" class="status-container">Camera initializing...</div>
+                <button id="captureBtn" style="font-weight: bold; width: 100%; padding: 8px 0;">Capture and Queue</button>
+                <canvas id="canvas" style="display:none;"></canvas>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const captureBtn = document.getElementById('captureBtn');
+        const statusDiv = document.getElementById('status');
+        const inspectionMode = document.getElementById('inspectionMode');
+        const settingsToggleBtn = document.getElementById('settingsToggleBtn');
+        const settingsPane = document.getElementById('settingsPane');
+        const dropboxTokenInput = document.getElementById('dropboxToken');
+
+        // Load credentials from isolated client browser state
+        dropboxTokenInput.value = localStorage.getItem('field_dropbox_token') || '';
+
+        dropboxTokenInput.addEventListener('input', () => {
+            localStorage.setItem('field_dropbox_token', dropboxTokenInput.value.trim());
+        });
+
+        settingsToggleBtn.addEventListener('click', () => {
+            settingsPane.classList.toggle('open');
+        });
+
+        // Initialize Camera Module
+        navigator.mediaDevices.getUserMedia({ video: { maxWidth: 1280, maxHeight: 960, facingMode: "environment" } })
+            .then(stream => { 
+                video.srcObject = stream; 
+                statusDiv.textContent = "System operational. Ready for deployment intake.";
+            })
+            .catch(err => {
+                statusDiv.innerHTML = "<span style='color:red;'>Hardware Fault: Cannot bind optics channel. " + err.message + "</span>";
+            });
+
+        // Capture Frame and Stream to Dropbox Cloud Storage
+        captureBtn.addEventListener('click', async () => {
+            const currentToken = localStorage.getItem('field_dropbox_token');
+            
+            if (!currentToken) {
+                statusDiv.innerHTML = "<span style='color:red;'>Configuration Fault: Missing Dropbox token. Access settings above.</span>";
+                settingsPane.classList.add('open');
+                return;
+            }
+
+            statusDiv.textContent = "Compressing and uploading image to processing matrix...";
+            captureBtn.disabled = true;
+
+            const ctx = canvas.getContext('2d');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            
+            canvas.toBlob(async (blob) => {
+                const uniqueId = Date.now();
+                const taskProfile = inspectionMode.value;
+                const filename = `${taskProfile}__field_capture_${uniqueId}.jpg`;
+
+                try {
+                    const response = await fetch('https://content.dropboxapi.com/2/files/upload', {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${currentToken}`,
+                            'Content-Type': 'application/octet-stream',
+                            'Dropbox-API-Arg': JSON.stringify({
+                                path: `/field_incoming/${filename}`,
+                                mode: 'add',
+                                autorename: true,
+                                mute: false
+                            })
+                        },
+                        body: blob
+                    });
+
+                    if (!response.ok) {
+                        const errorDetails = await response.text();
+                        throw new Error(`Dropbox API returned status ${response.status}`);
+                    }
+                    
+                    statusDiv.innerHTML = "<span style='color:blue;'>Package dispatched to cloud queue successfully.</span>";
+                } catch (err) {
+                    statusDiv.innerHTML = `<span style='color:red;'>Transmission Fault: ${err.message}</span>`;
+                    console.error(err);
+                } finally {
+                    captureBtn.disabled = false;
+                }
+            }, 'image/jpeg', 0.80);
+        });
+    </script>
+</body>
+</html>
